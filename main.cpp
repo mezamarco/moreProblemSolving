@@ -1,5 +1,6 @@
 
 
+
 //We will solve many problems in this given .cpp file
 #include <iostream>
 #include <string>
@@ -11,15 +12,18 @@
 //Function prototypes
 
 //Two String addition and then print the result in a string datatype.
-std::string twoSum(std::string a,std::string b);
-std::string helperSum(std::string larger, std::string smaller);
+std::string twoSum(std::string& a,std::string& b);
 
 //Checking if a string is a palindrome while ignoring non-alphabet characters
 bool isPalindrome(std::string & sentence);
 void convertToLower(std::string & word);
 
-std::vector<int> mergingTwoArrays( std::vector<int> vectA, std::vector<int> vectB,std::vector<int> & myVectAnswer);
 
+std::vector<int> mergeNoRecursion(std::vector<int> & a , std::vector<int> & b);
+
+
+
+char nonRepeatingChar(std::string word);
 
 int main(){
 
@@ -39,14 +43,6 @@ int main(){
 	std::cout << "\n\nSum("<< a << " , " << b << ")" << " = " << twoSum(a,b) <<"\n\n";
 
 
-	//We will now solve the N-queens problem
-	std::cout << "\n\n\nWe will now solve the N-Queens problem.\n\n";
-
-
-
-
-
-
 
 
 
@@ -54,10 +50,22 @@ int main(){
 	std::cout << "\n\n\nWe will now solve the first non-repeating character in a string.\n\n";
 
 	
+	std::cout << "Enter a string with repeated characters, except for one character: ";
+	std::string theString;	
+	getline(std::cin,theString);
 
-	//We will solve, Get the k-lowest elements in an unsorted Array.
+	std::cout << "Finding the non-repeated character: \n";
+	std::cout  << "We found it, the first non-repeated character: "<< nonRepeatingChar(theString);
+	std::cout << "\n\n";
 	
-
+	
+	
+	
+	
+	
+	
+	
+	
 	//Write a function to check if a word is a palindrome. 
 	//What about for sentences, and ignoring capitals, punctuation, and spaces?  
 	std::cout << "\n\nEnter a sentence and we will determine if we have a Palindrome: ";
@@ -67,10 +75,21 @@ int main(){
 	std::cout <<"\nChecking if the sentence is a palindrome:\n" << mySentence
        			<< "      = " << isPalindrome(mySentence) << "\n\n";
 
-	//Two array with n-elements, Merge those arrays using a recursive algortihm 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//Two array with n-elements, 
+	//Merge those arrays using a recursive algortihm 
 	//so that the integers in the final array are sorted.
+	//And also merge without recursion
 
-	std::cout << "\n\nWe will now solve the mergin problem:\n\n";
+	std::cout << "\n\nWe will now solve the merging problem:\n\n";
        //we need to create two array that are sorted
        srand(time(NULL));
 
@@ -84,26 +103,18 @@ int main(){
 	std::vector<int> vectB;
 
 
-	int prevOne = 23;
-	int prevTwo = 24;
+	int prevOne = 5;
+	int prevTwo = 5;
 
 	for(int i = 0; i < size ; i++)	
 	{
-		int randOne = rand() % 100000 + 1;
-		int randTwo = rand() % 100000 + 1;
+		int randOne = (rand() % (1000)+1) + prevOne;
+		int randTwo = (rand() % (1000)+1) + prevTwo;
 		
 
-		while(prevOne > randOne){
-			randOne = rand() % 100000 + 1;
-	
-				
-		}
 		prevOne = randOne;
 		vectA.push_back(prevOne);
 
-		while(prevTwo > randTwo){
-			randTwo = rand() % 100000 + 1;
-		}
 		prevTwo = randTwo;
 		vectB.push_back(prevTwo);
 
@@ -119,8 +130,17 @@ int main(){
 		std::cout << number << "  ";
 	}
 
+	std::vector<int>mergedNoRecursionVect = mergeNoRecursion(vectA, vectB); 
+
 	std::cout << std::endl;
 
+	std::cout << "Merging without Recursion: \n";
+	//We are merging with the no recursion vector
+	for(int val:mergedNoRecursionVect){
+		std::cout << val << "   ";
+	}
+
+	std::cout << "\n\n";
 
 	return 0;
 }
@@ -130,154 +150,72 @@ int main(){
 
 
 
-std::string twoSum(std::string a, std::string b) {
+std::string twoSum(std::string& a, std::string& b) {
+	if(a.length() == 0)
+		return b;
+	if(b.length() == 0)
+		return a;
 
-
-
-
-	std::string stringAnswer;
-
-	if(b.length() >= a.length()){
-		stringAnswer = helperSum(b,a);
-	}
-	else
-	{	
-		stringAnswer = helperSum(a,b);
-	}
-
-
-
-	return stringAnswer;
-	
-
-}
-
-
-std::string helperSum(std::string larger, std::string smaller){
-
-	
-	int endA = larger.length() - 1;
-	int endB = smaller.length() - 1;
-
-
-
-	int size = smaller.length();
-
+	std::string smaller = (a.length() <= b.length()) ? a:b; 
+	std::string larger = (a.length() <= b.length()) ? b:a;
+	std:::stack<char> myStack;
 	int carry = 0;
 	int sum = 0;
-	
-	int digitA;
-	int digitB;
-	
-	std::stack<int> answerStack;
 
-
-
-	for(int i = 0; i < size ; i++){
-	
-		//Starting at the end of both strings
-		
-
-		digitA = larger.at(endA - i) - 48;
-		digitB = smaller.at(endB -i) - 48;
-
-
-		//Get the sum and then mod it by 10, The sum value range is: [0-18]
-		sum = carry + digitA + digitB;
-		//Do we have to carry over?
+	//We need to start from the back, take into account the size of the smaller string
+	int i = smaller.length() - 1;
+	int j = larger.length() - 1;
+	//i belongs string a and j belong to string j
+	while( i >=0 )
+	{	
+		//Note theat the ASCII character of '0' is decimal:48
+		int numA = ( (int)smaller[i] - 48);
+		int numB = ( (int)larger[j] - 48);
+		sum = numA + numB + carry;
 
 		if(sum < 10){
 			carry = 0;
-			//Sum remains the same and then I carry nothing
-			
-			//Place this digit into the stack
-			answerStack.push(sum);	
+			myStack.push( (char)(sum + 48));
 		}
 		else{
 			carry = 1;
-			//We carry one and then push the digit by modding by 10 first.
-			sum = sum % 10;		
-			answerStack.push(sum);	
-		}
-
-
-	
-	}
-
-	std::stack<int> answerStack1 = answerStack; 
-
-
-
-
-	//Now we push the rest of the values
-	
-
-	if(carry == 1){
-		
-	
-		int startingIndex = larger.length() - size -1;
-		//Simply push the rest of the elements into the stack from the larger string
-		for(int m = startingIndex ;  m >= 0 ; m-- ){
-			
-			int currentIndexVal = int(larger.at(m)) - 48;
-
-			
-			int value =  carry + currentIndexVal;
-			
-			//Place the largerString values into the stack
-			//Remember in terms of values.
-			if(value < 10){
-				carry = 0;
-				answerStack.push(value);
-			} else{
-				carry = 1;
-				value = value %10;
-				answerStack.push(value);
-			}
+			int digit = sum % 10;
+			myStack.push((char)(digit + 48));
 		}
 		
-		
-		if(carry == 1);
-		{
-			answerStack.push(1);
+		--i;
+		--j;
+	}	
+	//We are done with the smaller string, finish up the remaining character of the second string
+	while( j >= 0 ){
+		sum = ( (int)(larger[j] - 48)) + carry;	
+		if(sum < 10){
+			carry = 0;
+			myStack.push((char)(sum +48));	
 		}
-
-
-	}
-	else{
-	
-		int startingIndex = larger.length() - size -1;
-		//Simply push the rest of the elements into the stack from the larger string
-		for(int m = startingIndex ;  m >= 0 ; m-- ){
-		
-			//Place the largerString values into the stack
-			//Remember in terms of values.
-			
-			int theVal = int(larger.at(m)) - 48;
-
-			answerStack.push(theVal);
-
+		else{
+			carry = 1;
+			int digit = sum % 10;
+			myStack.push((char)(digit + 48));
 		}
-	
-	
-	
+		--j;
 	}
 
+	if(carry == 1)
+		myStack.push('1');
 
-	std::cout << "The Answer is:\n"; 
-	while(!answerStack.empty()){
+	//Traverse the stack and combine into a string.
+	std::string ans = "";
 	
-		std::cout << answerStack.top() ;
-		answerStack.pop();
+	while(!myStack.empty()){
+		ans = ans + myStack.top();
+		myStack.pop();
 	}
 
-
-	return "HELLO";
-
-
-
-
+	return ans;
 }
+
+
 
 
 bool isPalindrome(std::string & sentence){
@@ -300,8 +238,6 @@ bool isPalindrome(std::string & sentence){
 		int valOne = (int)sentence[i];
 		int valTwo = (int)sentence[j];
 		std::cout << "VALUE ONE  =  " << valOne << "      Valuetwo = " << valTwo << "\n";
-
-		
 		
 		//Check for valid inputs only, remember we do not want to get spaces or punctuations.
 		if(  valOne >= 97 && valOne <= 122 && valTwo >= 97 && valTwo <=122 ){
@@ -313,13 +249,14 @@ bool isPalindrome(std::string & sentence){
 			--j;
 		}
 		else{
-	
+			//This is for the case that we have invalid characters
 
 			//Shift until we are in a correct position, for both i ad j
 			while( (int)sentence[i] < 97 || (int)sentence[i] >122){
-			
+				//If we are in the last index, we can no longer increment i
+				//Return false.
 				if(i > sentence.length() - 1){
-					return 0;
+					return false;
 				}
 		
 				std::cout << "Increment i\n";		
@@ -328,10 +265,9 @@ bool isPalindrome(std::string & sentence){
 	
 			//Shift until we are in a correct position, for both i ad j
 			while( (int)sentence[j] < 97 || (int)sentence[j] >122){
-			
-				if(j < 2){
-					return 0;
-				}
+				//If j is index 1, then we can decrement, return false
+				if(j < 2)
+					return false;
 				
 				--j;
 			}
@@ -367,62 +303,81 @@ void convertToLower(std::string & word)
 
 }
 
-std::vector<int> mergingTwoArrays( std::vector<int> vectA, std::vector<int> vectB,std::vector<int> & myVectAnswer){	
+
+
+char nonRepeatingChar(std::string word){
 	
-	int nSize = vectA.size();
+	//Make a counter for every single character;
+	std::vector<int> myVect(128,0);
 
-	//Keep track of two indices
-	int i = 0;
-	int j = 0;
+	//For every character in the string
+	for(int i =0; i < word.length(); i++){
+		int index = (int)word[i];
+		myVect[index] += 1;
 
-	//While we are in the correct positions	
-	while( i != nSize && j != nSize)
-	{
-		int iVal = vectA[i];
-		int jVal = vectB[j];
-		if(iVal < jVal)
-		{
-			//Insert the smaller value
-			myVectAnswer.push_back(iVal);
-			++i;	
+	}	
+
+	//We are looking for the FIRST non repeated character so traverse the 
+	//given word in order
+	for(int i = 0; i < word.length();i++){
+		int index = (int)word[i];
+
+		if(myVect[index] == 1){
+			return word.at(i);
+		}
 		
-		}
-		else{
-			//The jvalue is smaller 
-			myVectAnswer.push_back(jVal);
-			++j;	
-		}
 	}
-
-
-	//If we reach here we are done with one of the arrays, i
-	//so we must place the rest of the element into our vector answer
-
-	//Determine which of our arrays is done
 	
-	if( i ==  nSize){
-		//The first vector is complete so place the elements of our second vector 
-		//into the answer vector
-
-	       while(j != nSize){
-	       		myVectAnswer.push_back(vectB[j]);	
-		       ++j;
-	       }	
-	
-	}
-	else{
-
-	       while(i != nSize){
-	       		myVectAnswer.push_back(vectA[i]);	
-		       ++i;
-	       }	
-	}
 
 
-
-
-
-
-	return myVectAnswer;
+ 	//We found no answer, return '!';
+ 	return '!';
 
 }
+
+
+//Easy solution, when not using recursion for merging sorted arrays
+std::vector<int> mergeNoRecursion(std::vector<int> & a , std::vector<int> & b){
+    
+	int size = a.size();
+
+
+	std::vector<int> c;
+
+
+	int i =0;
+	int j =0;
+
+
+	//For all the elements in the both vector
+	while(i < size && j <size){
+		
+		if(a[i]<b[j]){
+		
+			//The smaller one is a[i], so insert that element into our vector c
+			c.push_back(a[i]);
+			++i;
+		}
+		else{
+			c.push_back(b[j]);
+			++j;
+		}
+	}
+
+	//Store the remaining elements of the first array
+
+	while(i<size){
+		c.push_back(a[i]);
+		++i;
+	}
+	//Store the remaining elements of the second array
+	while(j < size){
+		c.push_back(b[j]);
+		++j;
+	}
+
+
+
+	return c;	
+}
+

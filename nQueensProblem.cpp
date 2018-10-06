@@ -7,10 +7,9 @@
 const int N = 10;
 
 bool solveNqueens(int board[N][N], int col);
+bool isSafe( int board[N][N], int row, int col);
 
 void printMatrix(int board[N][N]);
-
-bool isSafe( int board[N][N], int row, int col);
 
 
 int main(int argc, char* argv[])
